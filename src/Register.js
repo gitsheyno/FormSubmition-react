@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
+const registeredURL = "/register";
+
 const Register = () => {
   // set the focus on the user input onLoad
   const inputRef = useRef();
@@ -77,7 +79,26 @@ const Register = () => {
       return;
     }
 
-    setSucces(true);
+    try {
+      const res = await fetch(registeredURL, {
+        method: "POST",
+        body: JSON.stringify({ user, pwd }),
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = res.json();
+      console.log(data.data);
+      setSucces(true);
+    } catch (err) {
+      if (!err?.response) {
+        setErrorMsg("No Server Response");
+      } else if (err.response?.status === 409) {
+        setErrorMsg("Username Taken");
+      } else {
+        setErrorMsg("Registration failed");
+      }
+
+      errRef.current.focus();
+    }
   };
   return (
     <>
